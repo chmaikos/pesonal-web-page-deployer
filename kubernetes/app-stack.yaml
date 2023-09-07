@@ -88,15 +88,6 @@ spec:
         io.kompose.network/docker-backend-network: "true"
         io.kompose.service: page-server
     spec:
-      initContainers:
-      - name: init-copy-static-client
-        image: chmaikos/devops_hua:latest
-        securityContext:
-          runAsUser: 0
-        command: ["sh", "-c", "cp -r /usr/src/app/build/client/* /shared-data/"]
-        volumeMounts:
-          - mountPath: /shared-data
-            name: static-client
       containers:
         - envFrom:
           - configMapRef:
@@ -107,15 +98,11 @@ spec:
               secretKeyRef:
                 name: smtp-secret
                 key: SMTP_PASSWORD
-          image: chmaikos/devops_hua:latest
+          image: chmaikos/devops-back:latest
           imagePullPolicy: Always
           name: backend
           resources: {}
       restartPolicy: Always
-      volumes:
-        - name: static-client
-          persistentVolumeClaim:
-            claimName: static-client
 status: {}
 ---
 apiVersion: v1
@@ -143,8 +130,8 @@ kind: PersistentVolumeClaim
 metadata:
   creationTimestamp: null
   labels:
-    io.kompose.service: static-client
-  name: static-client
+    io.kompose.service: nginx-secrets
+  name: nginx-secrets
   namespace: devops
 spec:
   accessModes:
@@ -173,41 +160,61 @@ status: {}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-static
+  annotations:
+    kompose.cmd: kompose convert -f ../../docker/docker-compose.prod.yml
+    kompose.version: 1.30.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
   namespace: devops
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx-static
+      io.kompose.service: frontend
+  strategy:
+    type: Recreate
   template:
     metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ../../docker/docker-compose.prod.yml
+        kompose.version: 1.30.0 (HEAD)
+      creationTimestamp: null
       labels:
-        app: nginx-static
+        io.kompose.network/docker-backend-network: "true"
+        io.kompose.service: frontend
     spec:
       containers:
-      - name: nginx-static
-        image: nginx:alpine
-        volumeMounts:
-        - name: static-client
-          mountPath: /usr/share/nginx/html
-      volumes:
-      - name: static-client
-        persistentVolumeClaim:
-          claimName: static-client
+        - env:
+            - name: FRONTEND
+              value: devops.red-net.gr
+          image: chmaikos/devops-frontend:kube
+          imagePullPolicy: Always
+          name: frontend
+          resources: {}
+      restartPolicy: Always
+status: {}
 ---
-# nginx-static-service.yamlexit
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-static-service
+  annotations:
+    kompose.cmd: kompose convert -f ../../docker/docker-compose.prod.yml
+    kompose.version: 1.30.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
   namespace: devops
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 80
+      targetPort: 80
   selector:
-    app: nginx-static
+    io.kompose.service: frontend
+  type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -236,7 +243,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: nginx-static-service
+            name: frontend
             port:
               number: 80
   tls:

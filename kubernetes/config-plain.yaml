@@ -8,7 +8,7 @@ data:
   DB_CONN_STRING: "mongodb://page-db:27017"
   DB_NAME: "blogDb"
   EXPOSED_PORT: "3000"
-  NODE_ENV: "production" # For example, 'development' or 'production'
+  NODE_ENV: "production"
   PORT: "3000"
   SMTP_HOST: "smtp.gmail.com"
   SMTP_PASSWORD: "your-smtp-password"
