@@ -2,6 +2,7 @@ version: "3.9"
 
 volumes:
   webpage-db-data:
+  nginx_secrets:
 
 networks:
   backend-network:
@@ -40,13 +41,15 @@ services:
 
   frontend:
     environment:
-      BACKEND: ${API_NAME_PORT}
+      BACKEND: ${BACKEND}
       FRONTEND: ${FRONTEND}
       CERTBOT_EMAIL: ${MY_EMAIL}
     image: chmaikos/devops-front:latest
     ports:
       - 80:80
       - 443:443
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
     depends_on:
       - page-server
     networks:
