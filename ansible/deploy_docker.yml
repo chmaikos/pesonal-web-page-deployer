@@ -37,7 +37,7 @@
 
     - name: Remove any existing Docker Compose stack with the same name
       shell:
-        cmd: "docker compose -f {{ compose_dest }}/{{ compose_file}} down -v || true"
+        cmd: "docker compose -f {{ compose_dest }}/{{ compose_file}} down || true"
       ignore_errors: yes  
 
     - name: Deploy .env from template

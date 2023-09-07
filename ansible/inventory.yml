@@ -6,7 +6,7 @@ all:
           ansible_ssh_user: your_username_for_bare_host_1
     docker:
       hosts:
-        dev-thanos.red-net.gr:
+        dev-docker.red-net.gr:
           ansible_ssh_user: root
     kubernetes:
       hosts:
