@@ -1,0 +1,53 @@
+version: "3.9"
+
+volumes:
+  webpage-db-data:
+
+networks:
+  backend-network:
+    driver: bridge
+
+services:
+  page-db:
+    container_name: database
+    image: mongo:latest
+    restart: always
+    volumes:
+      - webpage-db-data:/data/db
+    networks:
+      - backend-network
+
+  page-server:
+    container_name: backend
+    restart: always
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      EXPOSED_PORT: ${EXPOSED_PORT}
+      TOKEN_SECRET: ${TOKEN_SECRET}
+      DB_CONN_STRING: ${DB_CONN_STRING}
+      DB_NAME: ${DB_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_SENDER: ${SMTP_SENDER}
+    image: chmaikos/devops-back:latest
+    depends_on:
+      - page-db
+    networks:
+      - backend-network
+
+  frontend:
+    environment:
+      BACKEND: ${API_NAME_PORT}
+      FRONTEND: ${FRONTEND}
+      CERTBOT_EMAIL: ${MY_EMAIL}
+    image: chmaikos/devops-front:latest
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - page-server
+    networks:
+      - backend-network
