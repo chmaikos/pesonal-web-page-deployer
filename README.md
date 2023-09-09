@@ -9,6 +9,8 @@ This repository is designed to be used in conjunction with the personal web page
 
 ## Table of Contents
 
+---
+
 - [Personal Web Page Deployer](#personal-web-page-deployer)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
@@ -37,9 +39,10 @@ This repository is designed to be used in conjunction with the personal web page
     - [hcloud\_terraform\_kube\_hetzner](#hcloud_terraform_kube_hetzner)
     - [hcloud\_jenkins\_terraform](#hcloud_jenkins_terraform)
     - [Usage](#usage-3)
-  - [Contribution](#contribution)
 
 ## Prerequisites
+
+---
 
 Before you begin, ensure you have met the following prerequisites:
 
@@ -105,6 +108,8 @@ Keep the SSH key in a secure place as it will be needed for server authenticatio
 
 ## Ansible
 
+---
+
 The Ansible module leverages automation to simplify the deployment process, ensuring a hassle-free setup with minimized errors. Here are the pivotal files and their functionalities:
 
 - **.env.j2**: This is a Jinja2 template file that helps in setting up environment variables required during the deployment phase. It is essential to tailor this file to match your specific settings before initiating the Ansible playbooks.
@@ -136,6 +141,8 @@ The Ansible module leverages automation to simplify the deployment process, ensu
 
 ## Docker
 
+---
+
 The Docker module houses configurations essential for establishing your personal web page in a Docker environment. The key files in this module are:
 
 - **.env.example**: An illustrative file delineating the environment variables necessary for Docker configurations. It is recommended to rename it to `.env` and modify it to mirror your specific settings.
@@ -150,6 +157,8 @@ See [Ansible](#ansible)
 2. Launch the Docker Compose file using the command: `docker-compose -f docker-compose.prod.yml up -d` to initiate the deployment in a production environment.
 
 ## Kubernetes
+
+---
 
 This module empowers you to deploy your personal web page in a Kubernetes cluster, utilizing the configurations provided herein. The central files in this module include:
 
@@ -176,6 +185,8 @@ All other environment variables in the ConfigMap are the same as Docker and Ansi
    - `kubectl apply -f app-stack.yaml` to establish the necessary Kubernetes resources for your application.
 
 ## Terraform
+
+---
 
 The Terraform module encompasses scripts and configurations pivotal in provisioning infrastructure in the Hetzner Cloud. It bifurcates into two sub-modules: `hcloud_docker_vm` and `hcloud_npm_vm`, each housing key files detailed below:
 
@@ -232,7 +243,3 @@ If you want to know more about Jenkins integration with Github, see the [Documen
 1. Navigate to the sub-module of your choice (`hcloud_docker_vm` or `hcloud_npm_vm`) and rename `terraform.tfvars.example` to `terraform.tfvars`, inputting your Terraform variables to personalize your infrastructure setup.
 2. Initialize your Terraform configuration with the command: `terraform init` to prepare the Terraform working directory.
 3. Apply the Terraform configuration using the command: `terraform apply` to initiate the provisioning of your infrastructure as per the defined configurations.
-
-## Contribution
-
-We warmly welcome contributions to this project. Feel free to open issues or submit pull requests to enhance the repository further.
