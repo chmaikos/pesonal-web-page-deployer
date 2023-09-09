@@ -1,0 +1,160 @@
+---
+- name: Deploy npm backend and Vue frontend
+  hosts: bare
+  vars:
+    backend_repo: "git@github.com:Athanasioschourlias/pesonal-web-page-v3-server.git"
+    frontend_repo: "git@github.com:Athanasioschourlias/pesonal-web-page-v3-client.git"
+    backend_dir: "/var/www/backend"
+    frontend_dir: "/var/www/frontend"
+    node_env: "production"
+    port: "3000"
+    exposed_port: "3000"
+    token_secret: "123"
+    db_conn_string: "mongodb://localhost:27017"
+    db_name: "blogDb"
+    smtp_host: "smtp.gmail.com"
+    smtp_port: "587"
+    smtp_username: "thanos.chourlias+form@gmail.com"
+    smtp_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34333231356664316130383239333738393235613764663965353266303338343531326130366639
+          3937613931303735646538336531633033373536303662360a623834303339623465636137326165
+          66653337653037616139326130613633326431616337633563653436303437313639376236663861
+          3064326333656239380a656565383333653463303061346430316561663534656361343630316464
+          32346266633733396430623961613565663935333238396236396166333836336662
+    smtp_sender: "thanos.chourlias+form@gmail.com"
+    domain_name: "devops-npm.red-net.gr"
+    email: "chmaikos@gmail.com"
+  tasks:
+    - name: Check if backend directory exists
+      stat: 
+        path: "{{ backend_dir }}"
+      register: backend_dir_stat
+
+    - name: Clone the backend project repository
+      git: 
+        repo: "{{ backend_repo }}"
+        dest: "{{ backend_dir }}"
+        version: devops
+        clone: yes
+        update: yes
+      when: not backend_dir_stat.stat.exists
+
+    - name: Fetch and pull the latest changes for backend
+      git:
+        repo: "{{ backend_repo }}"
+        dest: "{{ backend_dir }}"
+        version: devops
+        clone: no
+        update: yes
+      when: backend_dir_stat.stat.exists
+
+    - name: Check if frontend directory exists
+      stat: 
+        path: "{{ frontend_dir }}"
+      register: frontend_dir_stat
+
+    - name: Clone the frontend project repository
+      git: 
+        repo: "{{ frontend_repo }}"
+        dest: "{{ frontend_dir }}"
+        version: devops
+        clone: yes
+        update: yes
+      when: not frontend_dir_stat.stat.exists
+
+    - name: Fetch and pull the latest changes for frontend
+      git:
+        repo: "{{ frontend_repo }}"
+        dest: "{{ frontend_dir }}"
+        version: devops
+        clone: no
+        update: yes
+      when: frontend_dir_stat.stat.exists
+
+    - name: Run build script for backend
+      shell: "bash scripts/build.sh"
+      args:
+        chdir: "{{ backend_dir }}"
+
+    - name: Run build script for frontend
+      shell: "bash scripts/build.sh"
+      args:
+        chdir: "{{ frontend_dir }}"
+
+    - name: Create .env file from template for backend
+      template: 
+        src: .env.j2
+        dest: "{{ backend_dir }}/build/src/.env"
+
+    - name: Start the backend with PM2
+      shell: "pm2 start npm --name 'devops-backend' -- start"
+      args:
+        chdir: "{{ backend_dir }}"
+
+    - name: Ensure the static client directory exists
+      file: 
+        path: "/etc/html/www/static/client"
+        state: directory
+
+    - name: Copy frontend dist files to static client directory
+      copy: 
+        src: "{{ frontend_dir }}/dist/"
+        dest: "/etc/html/www/static/client"
+        remote_src: yes
+
+    - name: Copy nginx configuration template
+      copy:
+        src: "{{ frontend_dir }}/docker/user.conf.template"
+        dest: "/etc/nginx/conf.d/default.conf.template"
+        remote_src: yes
+
+    - name: Substitute environment variables in nginx configuration
+      shell: |
+        export FRONTEND="devops-npm.red-net.gr"
+        export BACKEND="localhost:3000"
+        envsubst '${FRONTEND},${BACKEND}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
+        rm /etc/nginx/conf.d/default.conf.template
+
+    - name: Check if SSL certificates exist
+      stat:
+        path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+      register: ssl_cert_stat
+
+    - name: Check if dhparam file exists
+      stat:
+        path: "/etc/letsencrypt/dhparams/dhparam.pem"
+      register: dhparam_stat
+
+    - name: Stop nginx to get certs
+      shell: "systemctl stop nginx"
+      when: not ssl_cert_stat.stat.exists
+
+    - name: Generate SSL certificates using Certbot
+      shell: "certbot certonly --standalone --preferred-challenges http -d {{ domain_name }} -m {{ email }} --agree-tos --no-eff-email --non-interactive"
+      when: not ssl_cert_stat.stat.exists
+
+    - name: Set up Certbot auto-renewal with a cron job
+      cron:
+        name: "Certbot auto-renewal"
+        job: "/usr/bin/certbot renew --quiet"
+        minute: "30"
+        hour: "3"
+        day: "*/8"
+        user: root
+
+    - name: Ensure dhparams directory exists
+      file: 
+        path: "/etc/letsencrypt/dhparams"
+        state: directory
+      when: not dhparam_stat.stat.exists
+
+    - name: Generate dhparam.pem
+      shell: "openssl dhparam -out /etc/letsencrypt/dhparams/dhparam.pem 2048"
+      args:
+        creates: "/etc/letsencrypt/dhparams/dhparam.pem"
+      when: not dhparam_stat.stat.exists
+
+    - name: Reload nginx
+      shell: "systemctl start nginx && nginx -s reload"
+      

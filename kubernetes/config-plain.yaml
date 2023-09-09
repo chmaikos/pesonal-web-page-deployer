@@ -4,7 +4,6 @@ metadata:
   name: app-env-vars
   namespace: devops
 data:
-  API_BASE_URL: "http://devops.red-net.gr/api/v1/"
   DB_CONN_STRING: "mongodb://page-db:27017"
   DB_NAME: "blogDb"
   EXPOSED_PORT: "3000"

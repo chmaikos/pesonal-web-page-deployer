@@ -2,8 +2,8 @@ all:
   children:
     bare:
       hosts:
-        bare_host_1.example.com:
-          ansible_ssh_user: your_username_for_bare_host_1
+        devops-npm.red-net.gr:
+          ansible_ssh_user: root
     docker:
       hosts:
         dev-docker.red-net.gr:

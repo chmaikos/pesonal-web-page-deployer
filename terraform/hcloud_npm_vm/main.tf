@@ -58,7 +58,7 @@ resource "null_resource" "npm_ansible_setup" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/install.sh",
-      "/tmp/install.sh"
+      "/tmp/install.sh '${file(var.hcloud_ssh_key)}' '${file(var.hcloud_ssh_key_private)}'"
     ]
 
     connection {
