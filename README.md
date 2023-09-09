@@ -2,6 +2,11 @@
 
 Welcome to the Personal Web Page Deployer repository. This project facilitates the streamlined deployment of personal web pages using a variety of modern technologies including Ansible, Docker, Kubernetes, and Terraform. Below, you will find a detailed breakdown of each module and guidelines on how to use them to their fullest potential.
 
+This repository is designed to be used in conjunction with the personal web pages project, branch devops.
+
+- [Node Backend Application](https://github.com/Athanasioschourlias/pesonal-web-page-v3-server)
+- [Vue.JS Frontend Application](https://github.com/Athanasioschourlias/pesonal-web-page-v3-client)
+
 ## Table of Contents
 
 - [Personal Web Page Deployer](#personal-web-page-deployer)
@@ -31,7 +36,6 @@ Welcome to the Personal Web Page Deployer repository. This project facilitates t
     - [Environment Variables](#environment-variables-3)
     - [Usage](#usage-3)
   - [Contribution](#contribution)
-  - [License](#license)
 
 ## Prerequisites
 
@@ -196,7 +200,3 @@ The Terraform module encompasses scripts and configurations pivotal in provision
 ## Contribution
 
 We warmly welcome contributions to this project. Feel free to open issues or submit pull requests to enhance the repository further.
-
-## License
-
-(Provide details on the license under which this project is distributed)
