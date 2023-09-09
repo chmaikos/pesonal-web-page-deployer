@@ -189,7 +189,7 @@ spec:
         - env:
             - name: FRONTEND
               value: devops.red-net.gr
-          image: chmaikos/devops-frontend:kube
+          image: chmaikos/devops-front:kube
           imagePullPolicy: Always
           name: frontend
           resources: {}
