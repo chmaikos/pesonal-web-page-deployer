@@ -8,7 +8,3 @@ all:
       hosts:
         dev-docker.red-net.gr:
           ansible_ssh_user: root
-    kubernetes:
-      hosts:
-        kubernetes_master.example.com:
-          ansible_ssh_user: your_username_for_kubernetes_master

@@ -34,6 +34,8 @@ This repository is designed to be used in conjunction with the personal web page
     - [hcloud\_docker\_vm](#hcloud_docker_vm)
     - [hcloud\_npm\_vm](#hcloud_npm_vm)
     - [Environment Variables](#environment-variables-3)
+    - [hcloud\_terraform\_kube\_hetzner](#hcloud_terraform_kube_hetzner)
+    - [hcloud\_jenkins\_terraform](#hcloud_jenkins_terraform)
     - [Usage](#usage-3)
   - [Contribution](#contribution)
 
@@ -155,9 +157,15 @@ This module empowers you to deploy your personal web page in a Kubernetes cluste
 - **config-plain.yaml**: This configuration file facilitates the setup of a ConfigMap resource in your Kubernetes cluster, aiding in the streamlined management of your application's configuration.
 - **secret.yaml**: A Kubernetes secret file that helps in managing sensitive information such as passwords and API keys, enhancing the security posture of your application.
 
+The manifest was generated using Kompose and adjusted to expose the frontend only. Database and Backend are not accessible directly.
+
+The manifest assumes you already have a Kubernetes cluster configuration with a Traefik Ingress and Cert-Manager for SSL certificates.
+
 ### Environment Variables
 
 - `SMTP_PASSWORD`: The SMTP server password encoded in base64 format.
+
+All other environment variables in the ConfigMap are the same as Docker and Ansible.
 
 ### Usage
 
@@ -177,11 +185,27 @@ The Terraform module encompasses scripts and configurations pivotal in provision
 - **main.tf**: The principal Terraform configuration file that outlines the infrastructure to be provisioned, serving as the blueprint for your deployment setup.
 - **terraform.tfvars.example**: This example file guides you in setting up your Terraform variables. It is advisable to rename it to `terraform.tfvars` and modify it to reflect your specific settings.
 
+The provisioning process will automatically create a VPS in your project, an A Record pointing to it at Cloudflare and install Ansible and Docker. The VM should be configured and ready to be used if the plan succeeds.
+
+You can modify main.tf to customize the type and OS of your VM before applying.  
+
+**DO NOT EDIT THE STATE OF THE VM DIRECTLY**  
+
+If you need to change the VM configuration either destroy and apply again or use the hcloud CLI commands.
+
 ### hcloud_npm_vm
 
 - **install.sh**: This script facilitates the installation of necessary dependencies on your Hetzner Cloud VM, setting the stage for a successful deployment.
 - **main.tf**: The main Terraform configuration file in this sub-module defines the infrastructure to be provisioned, acting as the roadmap for your deployment strategy.
 - **terraform.tfvars.example**: An example file to assist you in configuring your Terraform variables. Rename it to `terraform.tfvars` and personalize it to suit your deployment needs.
+
+The provisioning process will automatically create a VPS in your project, an A Record pointing to it at Cloudflare and install npm, nginx, mongodb, ansible and certbot. It is also setup to install the hcloud_ssh_key you provide to the VM so it can be used in conjuction with GIT. The VM should be configured and ready to be used if the plan succeeds.
+
+You can modify main.tf to customize the type and OS of your VM before applying.  
+
+**DO NOT EDIT THE STATE OF THE VM DIRECTLY**  
+
+If you need to change the VM configuration either destroy and apply again or use the hcloud CLI commands.
 
 ### Environment Variables
 
@@ -190,6 +214,18 @@ The Terraform module encompasses scripts and configurations pivotal in provision
 - `domain_name`: Your domain name.
 - `cloudflare_api_token`: Your Cloudflare API token.
 - `cloudflare_zone_id`: Your Cloudflare Zone ID.
+
+### hcloud_terraform_kube_hetzner
+
+The terraform module that provisions a whole Kubernetes cluster in Hetnzers Infrastructure is maintened Kube-Hetzner.  
+See more info on how to use it [Here](https://github.com/kube-hetzner/terraform-hcloud-kube-hetzner/tree/master)  
+The kubernetes manifests in this repository are tested against this kubernetes cluster provisioning method.
+
+### hcloud_jenkins_terraform
+
+The repositories that contain the Front and Back components have Jenkins integration for CI/CD. If you want to set Jenkins up in one command, you can use the following repository for a terraform installation in Hetzner.  
+[Jenkins HCLOUD Terraform](https://github.com/Red-Net-Internet-Services/hcloud_jenkins_terraform)  
+If you want to know more about Jenkins integration with Github, see the [Documentation](https://www.jenkins.io/doc/)
 
 ### Usage
 
